@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: headlessspider-backend
+    command: python main.py
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"  # Optional if exposing API
+    restart: always
+    depends_on:
+      - firebase
+    networks:
+      - headlessnet
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: headlessspider-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - VITE_FIREBASE_PROJECT_ID=your-project-id
+    restart: always
+    networks:
+      - headlessnet
+
+  firebase:
+    image: firebase/emulators
+    container_name: headlessspider-firebase
+    ports:
+      - "4000:4000"  # Firebase UI
+      - "8080:8080"  # Firestore
+      - "9099:9099"  # Auth
+    volumes:
+      - ./firebase-data:/firebase
+    networks:
+      - headlessnet
+
+networks:
+  headlessnet:
+    driver: bridge
