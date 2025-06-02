@@ -14,7 +14,6 @@ import { format } from 'date-fns';
 interface ChartProps {
   campaignId?: string;
   timeRange?: '24h' | '7d' | '30d';
-  metricType?: 'all' | 'impressions' | 'clicks' | 'conversions';
 }
 
 interface ProcessedDataItem {
@@ -38,7 +37,6 @@ interface PieDataItem {
 export const Charts: React.FC<ChartProps> = ({
   campaignId,
   timeRange = '7d',
-  metricType = 'all',
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -155,8 +153,8 @@ export const Charts: React.FC<ChartProps> = ({
             margin={margin}
             slotProps={{
               legend: {
-                direction: 'row' as const,
-                position: { vertical: 'bottom', horizontal: 'middle' },
+                direction: 'row',
+                position: { vertical: 'bottom', horizontal: 'center' },
                 padding: 0,
               },
             }}
@@ -193,8 +191,8 @@ export const Charts: React.FC<ChartProps> = ({
             margin={margin}
             slotProps={{
               legend: {
-                direction: 'row' as const,
-                position: { vertical: 'bottom', horizontal: 'middle' },
+                direction: 'row',
+                position: { vertical: 'bottom', horizontal: 'center' },
                 padding: 0,
               },
             }}
@@ -224,8 +222,8 @@ export const Charts: React.FC<ChartProps> = ({
             margin={margin}
             slotProps={{
               legend: {
-                direction: 'row' as const,
-                position: { vertical: 'bottom', horizontal: 'middle' },
+                direction: 'row',
+                position: { vertical: 'bottom', horizontal: 'center' },
                 padding: 0,
               },
             }}

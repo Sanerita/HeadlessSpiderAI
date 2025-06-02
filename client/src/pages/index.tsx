@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Paper,
   Button,
   Chip,
@@ -14,20 +13,18 @@ import {
   Tooltip,
   CircularProgress,
   TextField,
-  InputAdornment,
-  Badge
+  InputAdornment
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
+
 import {
   Refresh,
   Add,
   Search,
   FilterList,
-  Campaign,
+  Campaign as CampaignIcon,
   Insights,
-  Timeline,
-  BarChart,
-  PieChart,
-  ShowChart
+  Timeline
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -43,7 +40,7 @@ import { format } from 'date-fns';
 import { CampaignCard } from '../components/CampaignCard';
 import { PerformanceChart } from '../components/PerformanceChart';
 import { PlatformDistribution } from '../components/PlatformDistribution';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import LoadingSkeleton from '../components/LoadingSkeleton';
 
 interface Campaign {
   id: string;
@@ -70,7 +67,6 @@ export const HomePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
 
-  // Fetch campaigns
   useEffect(() => {
     setIsLoading(true);
     let q = query(
@@ -106,7 +102,7 @@ export const HomePage: React.FC = () => {
   const completedCampaigns = campaigns.filter(c => c.status === 'completed');
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+    setActiveTab(newValue); // Keep event parameter as it's part of the expected function signature
   };
 
   const handleRefresh = () => {
@@ -139,7 +135,7 @@ export const HomePage: React.FC = () => {
 
       {/* Stats Overview */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
+        <Grid component="div" item xs={12} md={4}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" color="text.secondary">
               Active Campaigns
@@ -158,7 +154,7 @@ export const HomePage: React.FC = () => {
             </Box>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid component="div" item xs={12} md={4}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" color="text.secondary">
               Paused Campaigns
@@ -177,7 +173,7 @@ export const HomePage: React.FC = () => {
             </Box>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid component="div" item xs={12} md={4}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" color="text.secondary">
               Completed Campaigns
@@ -240,7 +236,7 @@ export const HomePage: React.FC = () => {
         aria-label="dashboard tabs"
         sx={{ mb: 3 }}
       >
-        <Tab label="Campaigns" icon={<Campaign />} />
+        <Tab label="Campaigns" icon={<CampaignIcon />} />
         <Tab label="Analytics" icon={<Insights />} />
         <Tab label="Timeline" icon={<Timeline />} />
       </Tabs>
@@ -248,13 +244,13 @@ export const HomePage: React.FC = () => {
       <Divider sx={{ mb: 3 }} />
 
       {/* Tab Content */}
-      {activeTab === 0 && (
-        <Grid container spacing={3}>
+      {activeTab === 0 && ( // No changes needed here, container is already present from previous edits.
+        <Grid container spacing={3} container>
           {isLoading ? (
             <LoadingSkeleton count={6} />
           ) : filteredCampaigns.length > 0 ? (
             filteredCampaigns.map((campaign) => (
-              <Grid item xs={12} sm={6} md={4} key={campaign.id}>
+              <Grid component="div" item xs={12} sm={6} md={4} key={campaign.id}>
                 <CampaignCard
                   id={campaign.id}
                   name={campaign.campaignName}
@@ -269,7 +265,7 @@ export const HomePage: React.FC = () => {
               </Grid>
             ))
           ) : (
-            <Grid item xs={12}>
+            <Grid component="div" item xs={12}>
               <Paper sx={{ p: 4, textAlign: 'center' }}>
                 <Typography variant="h6" gutterBottom>
                   No campaigns found
@@ -297,7 +293,7 @@ export const HomePage: React.FC = () => {
 
       {activeTab === 1 && (
         <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
+          <Grid component="div" item xs={12} md={8}>
             <Paper sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom>
                 Performance Overview
@@ -305,12 +301,20 @@ export const HomePage: React.FC = () => {
               <PerformanceChart campaigns={campaigns} />
             </Paper>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid component="div" item xs={12} md={4}>
             <Paper sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom>
                 Platform Distribution
               </Typography>
-              <PlatformDistribution campaigns={campaigns} />
+              <PlatformDistribution 
+                data={campaigns.flatMap(c => 
+                  c.platforms.map(platform => ({
+                    platform,
+                    metrics: c.metrics || { impressions: 0, clicks: 0, conversions: 0, spend: 0 }
+                  }))
+                )} 
+                timeRange="7d" 
+              />
             </Paper>
           </Grid>
         </Grid>

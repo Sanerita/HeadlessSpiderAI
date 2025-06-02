@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { 
   Box, 
   Typography, 
-  Paper, 
-  Grid, 
+  Paper,  
   Divider, 
   Chip, 
   Tabs, 
@@ -17,12 +16,14 @@ import {
   FormControl,
   InputLabel
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
+
 import { 
   ArrowBack, 
   Refresh, 
   Info, 
-  BarChart, 
-  PieChart, 
+  BarChart as BarChartIcon, 
+  PieChart as PieChartIcon, 
   ShowChart,
   ScatterPlot,
   Timeline 
@@ -37,13 +38,13 @@ import {
   orderBy,
   limit
 } from 'firebase/firestore';
-import { useFirestoreDocData, useFirestoreCollectionData } from 'reactfire';
+import { useFirestoreDocData, useFirestoreCollectionData, useSigninCheck } from 'reactfire';
 import { format } from 'date-fns';
 import { Charts } from '../components/Charts';
 import { CampaignPerformanceMetrics } from '../components/CampaignPerformanceMetrics';
 import { PlatformDistribution } from '../components/PlatformDistribution';
 import { ContentPreview } from '../components/ContentPreview';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import LoadingSkeleton from '../components/LoadingSkeleton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -60,6 +61,11 @@ interface CampaignData {
   timestamp?: { toDate: () => Date };
   strategySummary?: string;
   contentVariants?: any[];
+}
+
+interface PlatformData {
+  platform: string;
+  value: number;
 }
 
 interface PerformanceData {
@@ -105,6 +111,7 @@ function a11yProps(index: number) {
 export const CampaignPage: React.FC = () => {
   const { campaignId = '' } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
+  const { status: authStatus, data: signInCheckResult } = useSigninCheck();
   const [value, setValue] = useState(0);
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('7d');
   const [activeMetric, setActiveMetric] = useState<'all' | 'impressions' | 'clicks' | 'conversions'>('all');
@@ -125,7 +132,7 @@ export const CampaignPage: React.FC = () => {
     limit(timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : 30)
   );
   
-  const { status: performanceStatus, data: performanceData = [] } = useFirestoreCollectionData<PerformanceData>(performanceQuery, {
+  const { status: performanceStatus, data: performanceData } = useFirestoreCollectionData<PerformanceData>(performanceQuery, {
     idField: 'id'
   });
 
@@ -138,15 +145,15 @@ export const CampaignPage: React.FC = () => {
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
-  const handleTimeRangeChange = (event: { target: { value: string } }) => {
-    setTimeRange(event.target.value as '24h' | '7d' | '30d');
+  const handleTimeRangeChange = (event: { target: { value: '24h' | '7d' | '30d' } }) => {
+    setTimeRange(event.target.value);
   };
 
-  const handleMetricChange = (event: { target: { value: string } }) => {
-    setActiveMetric(event.target.value as 'all' | 'impressions' | 'clicks' | 'conversions');
+  const handleMetricChange = (event: { target: { value: 'all' | 'impressions' | 'clicks' | 'conversions' } }) => {
+    setActiveMetric(event.target.value);
   };
 
-  if (campaignStatus === 'loading' || performanceStatus === 'loading') {
+  if (campaignStatus === 'loading' || performanceStatus === 'loading' || authStatus === 'loading') {
     return <LoadingSkeleton />;
   }
 
@@ -163,6 +170,14 @@ export const CampaignPage: React.FC = () => {
     );
   }
 
+  if (!signInCheckResult.signedIn) {
+    navigate('/signin');
+    return null;
+  }
+  if (!performanceData) {
+    return <LoadingSkeleton />;
+  }
+
   // Calculate totals
   const totals = performanceData.reduce((acc, item) => ({
     impressions: acc.impressions + (item.metrics?.impressions || 0),
@@ -177,13 +192,23 @@ export const CampaignPage: React.FC = () => {
     : 0;
   const cpa = totals.conversions > 0 
     ? totals.spend / totals.conversions 
-    : 0;
+    : 0; // Handle division by zero
+
+  // Aggregate performance data by platform for PlatformDistribution
+  const platformData: PlatformData[] = Object.entries(
+    performanceData.reduce((acc, item) => {
+      if (item.platform && item.metrics?.impressions) {
+        acc[item.platform] = (acc[item.platform] || 0) + item.metrics.impressions;
+      }
+      return acc;
+    }, {} as { [key: string]: number })
+  ).map(([platform, value]) => ({ platform, value }));
 
   // Format dates
-  const startDate = campaignData.timestamp?.toDate 
+  const startDate = campaignData.timestamp?.toDate && campaignData.timestamp.toDate instanceof Function
     ? format(campaignData.timestamp.toDate(), 'PPpp') 
     : 'N/A';
-  const lastUpdated = performanceData.length > 0 && performanceData[0].timestamp?.toDate
+  const lastUpdated = performanceData.length > 0 && performanceData[0].timestamp?.toDate && performanceData[0].timestamp.toDate instanceof Function
     ? format(performanceData[0].timestamp.toDate(), 'PPpp')
     : 'N/A';
 
@@ -238,12 +263,12 @@ export const CampaignPage: React.FC = () => {
               <Info color="primary" /> Campaign Details
             </Typography>
             <Divider sx={{ my: 1 }} />
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
+            <Grid container spacing={2} >
+              <Grid item xs={6} >
                 <Typography variant="body2" color="text.secondary">Objective</Typography>
                 <Typography>{campaignData.objective || 'N/A'}</Typography>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={6} >
                 <Typography variant="body2" color="text.secondary">Platforms</Typography>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {campaignData.platforms?.map((platform) => (
@@ -251,17 +276,17 @@ export const CampaignPage: React.FC = () => {
                   )) || <Typography>N/A</Typography>}
                 </Box>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={6} >
                 <Typography variant="body2" color="text.secondary">Start Date</Typography>
                 <Typography>{startDate}</Typography>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={6} >
                 <Typography variant="body2" color="text.secondary">Last Updated</Typography>
                 <Typography>{lastUpdated}</Typography>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} >
                 <Typography variant="body2" color="text.secondary">Strategy</Typography>
-                <Typography>
+                <Typography >
                   {campaignData.strategySummary || 'No strategy description available'}
                 </Typography>
               </Grid>
@@ -290,8 +315,8 @@ export const CampaignPage: React.FC = () => {
             variant="scrollable"
             scrollButtons="auto"
           >
-            <Tab label="Performance" icon={<BarChart />} {...a11yProps(0)} />
-            <Tab label="Platforms" icon={<PieChart />} {...a11yProps(1)} />
+            <Tab label="Performance" icon={<BarChartIcon />} {...a11yProps(0)} />
+            <Tab label="Platforms" icon={<PieChartIcon />} {...a11yProps(1)} />
             <Tab label="Trends" icon={<ShowChart />} {...a11yProps(2)} />
             <Tab label="Efficiency" icon={<ScatterPlot />} {...a11yProps(3)} />
             <Tab label="Content" icon={<Timeline />} {...a11yProps(4)} />
@@ -321,7 +346,7 @@ export const CampaignPage: React.FC = () => {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <PlatformDistribution 
-            data={performanceData}
+            data={platformData}
             timeRange={timeRange}
           />
         </TabPanel>

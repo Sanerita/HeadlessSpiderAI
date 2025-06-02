@@ -1,18 +1,21 @@
 // client/src/components/PerformanceChart.tsx
 import React from 'react';
 import { LineChart } from '@mui/x-charts';
-import { useTheme, Paper, Typography, Box } from '@mui/material';
+import { useTheme, Box } from '@mui/material';
+
+
+interface CampaignData {
+  startDate: { seconds: number };
+  metrics?: {
+    impressions?: number;
+    clicks?: number;
+    conversions?: number;
+    spend?: number;
+  };
+}
 
 interface PerformanceChartProps {
-  campaigns: Array<{
-    startDate: { seconds: number };
-    metrics?: {
-      impressions: number;
-      clicks: number;
-      conversions: number;
-      spend: number;
-    };
-  }>;
+  campaigns: CampaignData[];
 }
 
 export const PerformanceChart: React.FC<PerformanceChartProps> = ({ campaigns }) => {
@@ -61,15 +64,15 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({ campaigns })
           },
         ]}
         xAxis={[{
-          data: chartData.map(d => d.date.split('-').slice(1).join('/')),
+ data: chartData.map(d => d.date ? d.date.split('-').slice(1).join('/') : ''),
           scaleType: 'band',
         }]}
         margin={{ top: 20, bottom: 60, left: 70, right: 30 }}
         slotProps={{
           legend: {
-            direction: 'row',
-            position: { vertical: 'bottom', horizontal: 'middle' },
-          },
+            direction: 'row' as const,
+            position: { vertical: 'bottom', horizontal: 'middle' as const },
+ },
         }}
       />
     </Box>

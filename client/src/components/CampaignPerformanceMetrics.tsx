@@ -4,11 +4,12 @@ import {
   Box, 
   Typography, 
   Paper, 
-  Grid, 
   Divider, 
   LinearProgress,
   useTheme
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
+
 import { 
   ArrowUpward, 
   ArrowDownward,
@@ -88,7 +89,7 @@ export const CampaignPerformanceMetrics: React.FC<CampaignPerformanceMetricsProp
         <Equalizer color="primary" /> Performance Summary
       </Typography>
       <Divider sx={{ my: 1 }} />
-      <Grid container spacing={2}>
+      <Grid container spacing={2} container>
         <Grid item xs={6} md={4}>
           <MetricCard
             title="Impressions"

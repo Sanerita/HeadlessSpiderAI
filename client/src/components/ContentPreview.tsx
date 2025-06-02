@@ -3,12 +3,9 @@ import React, { useState } from 'react';
 import { 
   Box, 
   Typography, 
-  Paper, 
-  Grid, 
-  Divider, 
-  Tabs, 
-  Tab,
-  Card,
+  Paper,  
+ Tabs, Tab,
+ Card,
   CardContent,
   CardMedia,
   Chip,
@@ -17,6 +14,8 @@ import {
   Tooltip,
   useTheme
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
+
 import { 
   Image, 
   TextFields, 
@@ -48,7 +47,6 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
 }) => {
   const [value, setValue] = useState(0);
   const [activePlatform, setActivePlatform] = useState('all');
-  const theme = useTheme();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -58,7 +56,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
     setActivePlatform(platform);
   };
 
-  const filteredVariants = activePlatform === 'all' 
+  const filteredVariants = activePlatform === 'all'
     ? variants 
     : variants.filter(v => v.platform === activePlatform);
 
@@ -70,13 +68,13 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Tabs 
-          value={value} 
-          onChange={handleChange} 
+        <Tabs
+ value={value}
+ onChange={handleChange}
           aria-label="content tabs"
         >
           <Tab label="Text Ads" icon={<TextFields />} />
-          <Tab label="Image Ads" icon={<Image />} />
+          <Tab label="Image Ads" icon={<Image />} /> {/* Corrected Tab component */}
           <Tab label="Generated Code" icon={<Code />} />
         </Tabs>
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -105,12 +103,12 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
       <TabPanel value={value} index={0}>
         {textVariants.length > 0 ? (
           <Grid container spacing={3}>
-            {textVariants.map((variant, index) => (
+            {textVariants.map((variant) => (
               <Grid item xs={12} md={6} key={variant.id}>
                 <Card>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Chip label={variant.platform} size="small" />
+ <Chip label={variant.platform} size="small" />
                       {variant.performance && (
                         <Chip 
                           label={`${variant.performance}% CTR`} 
@@ -148,7 +146,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
 
       <TabPanel value={value} index={1}>
         {imageVariants.length > 0 ? (
-          <Grid container spacing={3}>
+          <Grid container spacing={3} container>
             {imageVariants.map((variant) => (
               <Grid item xs={12} sm={6} md={4} key={variant.id}>
                 <Card>
@@ -159,7 +157,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                       image={variant.previewUrl}
                       alt="Generated ad content"
                     />
-                  ) : (
+ ) : (
                     <Box sx={{ 
                       height: 200, 
                       bgcolor: theme.palette.grey[200],
@@ -172,7 +170,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                   )}
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Chip label={variant.platform} size="small" />
+ <Chip label={variant.platform} size="small" />
                       {variant.performance && (
                         <Chip 
                           label={`${variant.performance}% CTR`} 
@@ -204,7 +202,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
             API Response Codes
           </Typography>
           <Typography variant="body2" component="pre" sx={{ 
-            bgcolor: theme.palette.grey[100], 
+ bgcolor: theme.palette.grey[100],
             p: 2, 
             borderRadius: 1,
             overflowX: 'auto'

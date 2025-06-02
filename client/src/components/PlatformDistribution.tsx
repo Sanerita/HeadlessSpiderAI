@@ -5,13 +5,14 @@ import {
   Typography, 
   Paper, 
   useTheme,
-  Grid,
   Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
+
 import { PieChart } from '@mui/x-charts/PieChart';
 import { 
   Facebook, 
@@ -30,9 +31,18 @@ const platformIcons: Record<string, React.ReactNode> = {
   'Meta': <Facebook color="primary" />,
 };
 
+interface PlatformData {
+  platform: string;
+  metrics?: {
+    impressions?: number;
+    clicks?: number;
+    conversions?: number;
+    spend?: number;
+  };
+}
+
 interface PlatformDistributionProps {
-  data: any[];
-  timeRange: '24h' | '7d' | '30d';
+  data: PlatformData[];
 }
 
 export const PlatformDistribution: React.FC<PlatformDistributionProps> = ({ 
@@ -44,7 +54,8 @@ export const PlatformDistribution: React.FC<PlatformDistributionProps> = ({
   // Aggregate data by platform
   const platformData = data.reduce((acc, item) => {
     const platform = item.platform || 'Unknown';
-    acc[platform] = (acc[platform] || 0) + (item.metrics?.impressions || 0);
+    const impressions = item.metrics?.impressions || 0;
+    acc[platform] = (acc[platform] || 0) + impressions;
     return acc;
   }, {} as Record<string, number>);
 
@@ -71,8 +82,8 @@ export const PlatformDistribution: React.FC<PlatformDistributionProps> = ({
   const totalImpressions = sortedPlatforms.reduce((sum, item) => sum + item.impressions, 0);
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={6}>
+    <Grid container spacing={3}> {/* This is the parent container */}
+      <Grid item xs={12} md={6}> {/* This is an item */}
         <Paper sx={{ p: 2, height: '100%' }}>
           <Typography variant="h6" gutterBottom>
             Impressions by Platform
@@ -87,17 +98,15 @@ export const PlatformDistribution: React.FC<PlatformDistributionProps> = ({
                   paddingAngle: 5,
                   cornerRadius: 5,
                   highlightScope: { faded: 'global', highlighted: 'item' },
-                  faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                  fade: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                 },
               ]}
-              slotProps={{
-                legend: { hidden: true },
-              }}
+              // Legend is hidden by default if not explicitly added to `slotProps`
             />
           </Box>
         </Paper>
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} md={6}> {/* This is another item */}
         <Paper sx={{ p: 2, height: '100%' }}>
           <Typography variant="h6" gutterBottom>
             Platform Breakdown
@@ -113,8 +122,8 @@ export const PlatformDistribution: React.FC<PlatformDistributionProps> = ({
                     {platformIcons[item.platform] || <Google />}
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText 
-                  primary={item.platform} 
+                <ListItemText
+                  primary={item.platform}
                   secondary={`${item.impressions.toLocaleString()} impressions`}
                 />
                 <Typography variant="body1" fontWeight="bold">
