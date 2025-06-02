@@ -9,22 +9,26 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.13.4",
+    "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@mui/x-charts": "^8.5.0",
     "date-fns": "^4.1.0",
     "firebase": "^9.23.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "reactfire": "^4.2.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.1",
+    "reactfire": "^4.2.1",
     "recharts": "^2.15.3"
   },
   "devDependencies": {
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
+    "@tsconfig/node18": "^18.2.4",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
     "@vitejs/plugin-react": "^4.0.3",
-    "eslint": "^8.45.0",
+    "eslint": "^9.28.0",
     "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "vite": "^6.3.5"
   }

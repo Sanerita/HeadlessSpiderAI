@@ -5,24 +5,34 @@ import {
   BarChart,
   PieChart,
   ScatterChart,
-  ChartContainer,
-  ChartsLegend,
-  ChartsTooltip,
-  ChartsAxis,
-  ChartsReferenceLine,
-  ChartsXAxis,
-  ChartsYAxis,
 } from '@mui/x-charts';
 import { useTheme, Box, Typography, Paper, useMediaQuery } from '@mui/material';
 import { useFirestoreCollectionData } from 'reactfire';
 import { collection, query, where, getFirestore, orderBy, limit } from 'firebase/firestore';
-import { format, subDays } from 'date-fns';
-import { LoadingSkeleton } from './LoadingSkeleton';
+import { format } from 'date-fns';
 
 interface ChartProps {
   campaignId?: string;
   timeRange?: '24h' | '7d' | '30d';
   metricType?: 'all' | 'impressions' | 'clicks' | 'conversions';
+}
+
+interface ProcessedDataItem {
+  date: Date;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  spend: number;
+  ctr: number;
+  platform: string;
+  campaignName: string;
+}
+
+interface PieDataItem {
+  id: string;
+  value: number;
+  label: string;
+  color?: string;
 }
 
 export const Charts: React.FC<ChartProps> = ({
@@ -70,8 +80,8 @@ export const Charts: React.FC<ChartProps> = ({
   }
 
   // Process data for charts
-  const processedData = campaignData
-    .map((item) => ({
+  const processedData: ProcessedDataItem[] = campaignData
+    .map((item: any) => ({
       date: item.timestamp?.toDate() || new Date(),
       impressions: item.metrics?.impressions || 0,
       clicks: item.metrics?.clicks || 0,
@@ -100,7 +110,7 @@ export const Charts: React.FC<ChartProps> = ({
     return acc;
   }, {} as Record<string, number>);
 
-  const pieData = Object.entries(platformDistribution).map(([platform, value]) => ({
+  const pieData: PieDataItem[] = Object.entries(platformDistribution).map(([platform, value]) => ({
     id: platform,
     value,
     label: platform,
@@ -145,7 +155,7 @@ export const Charts: React.FC<ChartProps> = ({
             margin={margin}
             slotProps={{
               legend: {
-                direction: isMobile ? 'row' : 'row',
+                direction: 'row' as const,
                 position: { vertical: 'bottom', horizontal: 'middle' },
                 padding: 0,
               },
@@ -166,30 +176,30 @@ export const Charts: React.FC<ChartProps> = ({
                 data: ctrData,
                 label: 'CTR (%)',
                 color: theme.palette.info.main,
-                valueFormatter: (value) => `${value.toFixed(2)}%`,
-                yAxisKey: 'ctr',
+                valueFormatter: (value: number | null) => `${(value ?? 0).toFixed(2)}%`,
               },
               {
                 data: spendData,
                 label: 'Spend ($)',
                 color: theme.palette.warning.main,
-                valueFormatter: (value) => `$${value.toFixed(2)}`,
-                yAxisKey: 'spend',
+                valueFormatter: (value: number | null) => `$${(value ?? 0).toFixed(2)}`,
               },
             ]}
             xAxis={[{ data: xAxisData, scaleType: 'band' }]}
             yAxis={[
-              { id: 'ctr', min: 0, max: Math.max(...ctrData) * 1.2 },
-              { id: 'spend', min: 0, max: Math.max(...spendData) * 1.2 },
+              { id: 'leftAxis', min: 0, max: Math.max(...ctrData) * 1.2 },
+              { id: 'rightAxis', min: 0, max: Math.max(...spendData) * 1.2 },
             ]}
             margin={margin}
             slotProps={{
               legend: {
-                direction: isMobile ? 'row' : 'row',
+                direction: 'row' as const,
                 position: { vertical: 'bottom', horizontal: 'middle' },
                 padding: 0,
               },
             }}
+            leftAxis="leftAxis"
+            rightAxis="rightAxis"
           />
         </Box>
       </Paper>
@@ -208,14 +218,13 @@ export const Charts: React.FC<ChartProps> = ({
                 outerRadius: 100,
                 paddingAngle: 5,
                 cornerRadius: 5,
-                highlightScope: { faded: 'global', highlighted: 'item' },
-                faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                highlightScope: { fade: 'global', highlight: 'item' },
               },
             ]}
             margin={margin}
             slotProps={{
               legend: {
-                direction: isMobile ? 'row' : 'row',
+                direction: 'row' as const,
                 position: { vertical: 'bottom', horizontal: 'middle' },
                 padding: 0,
               },
@@ -245,7 +254,6 @@ export const Charts: React.FC<ChartProps> = ({
             xAxis={[{ label: 'Spend ($)', min: 0 }]}
             yAxis={[{ label: 'Conversions', min: 0 }]}
             margin={margin}
-            tooltip={{ trigger: 'item' }}
           />
         </Box>
       </Paper>
@@ -253,7 +261,6 @@ export const Charts: React.FC<ChartProps> = ({
   );
 };
 
-// Loading Skeleton Component
 const LoadingSkeleton: React.FC = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
     {[...Array(4)].map((_, index) => (

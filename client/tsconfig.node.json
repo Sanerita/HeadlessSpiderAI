@@ -1,5 +1,76 @@
 {
-  "compilerOptions": {
-    "composite": true
-  }
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions":{
+    /* Base Options */
+    "composite": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    
+    /* Strict Type-Checking */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    
+    /* Module Resolution */
+    "baseUrl": ".",
+    "paths": {
+      "@backend/*": ["backend/*"],
+      "@utils/*": ["backend/utils/*"],
+      "@services/*": ["backend/services/*"],
+      "@types/*": ["types/*"]
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    
+    /* Output */
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    
+    /* Custom */
+    "allowJs": false,
+    "checkJs": false,
+    "removeComments": false,
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "backend/**/*.ts",
+    "backend/**/*.tsx",
+    "scripts/**/*.ts",
+    "vite.config.ts",
+    "types/**/*.d.ts",
+    "tests/server/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "client",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__mocks__/*"
+  ],
+  "references": [
+    { "path": "./tsconfig.json" } 
+  ]
 }
